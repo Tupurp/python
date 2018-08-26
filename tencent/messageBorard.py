@@ -21,10 +21,10 @@ headers = {
     'cache-control': 'max-age=1',
     'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36',
 }
-user='请替换为你的登录QQ'
-pwd='请替换为你的登录QQ密码'
-toUser='请替换为你想要爬取的好友QQ，要有权限访问'
-savaFile="文件保存地址，例：F:\\tencent10.txt"
+user='你的登录QQ'
+pwd='你的登录QQ密码'
+specialFriend='爬取指定好友的QQ'
+savaFile="文件保存地址，例：F:\\messageBoard.txt"
 
 ##过滤HTML中的标签
 #将HTML中标签等信息去掉
@@ -113,12 +113,12 @@ def get_allQQ(mysession, g_tk, qzonetoken):
     return nvDict
 
 
-def saveWords(session, gtk, token, start=3760):
+def saveWords(friend,session, gtk, token, start=0):
     print('当前下载第%d页数据'%(start/10+1))
     url = 'https://user.qzone.qq.com/proxy/domain/m.qzone.qq.com' \
           '/cgi-bin/new/get_msgb?uin=%s&hostUin=%s&start=%s' \
           '&s=0.1698142305644994&format=jsonp&num=10&inCharset=utf-8' \
-          '&outCharset=utf-8&g_tk=%s&qzonetoken=%s&g_tk=%s' % (user, toUser, start, gtk, token, gtk)
+          '&outCharset=utf-8&g_tk=%s&qzonetoken=%s&g_tk=%s' % (user, friend, start, gtk, token, gtk)
     res = session.get(url)
     text = res.text
     text = text[10:-3]
@@ -147,7 +147,7 @@ def saveWords(session, gtk, token, start=3760):
     start = start+10
     time.sleep(3)
     #递归
-    saveWords(session,gtk,token,start)
+    saveWords(friend,session,gtk,token,start)
 
 
 def begin():
@@ -160,18 +160,31 @@ def begin():
     driver.find_element_by_id('login_button').click()
     time.sleep(4)
     html = driver.page_source
-    xpat = r'window\.g_qzonetoken = \(function\(\)\{ try{return \"(.*)";'
     
+    xpat = r'window\.g_qzonetoken = \(function\(\)\{ try{return \"(.*)";'
+
     qzonetoken = re.compile(xpat).findall(html)[0]
     cookies = driver.get_cookies()
     realCookie = {}
+    
     print(cookies)
     for elem in cookies:
         realCookie[elem['name']] = elem['value']
+        
     g_tk = get_g_tk(realCookie)
     session = back_session(realCookie)
+    
     driver.close()
+   
     print(g_tk, realCookie, session.cookies)
-    saveWords(session, g_tk, qzonetoken)
-
+    #获取好友列表数据
+    friend_list = get_allQQ(session, g_tk, qzonetoken)
+    
+    #for item in friend_list.keys():
+    #    print("即将爬取好友:"+item+"的留言板")
+    #    print(friend_list.get(item))
+    #    friend=friend_list.get(item)
+    #    saveWords(friend,session,g_tk, qzonetoken)
+    
+    saveWords(specialFriend, session, g_tk, qzonetoken)
 begin()
