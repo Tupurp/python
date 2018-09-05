@@ -3,7 +3,7 @@
 # @File  : export.py
 # @Author: tupurp
 # @Date  : 2018/9/5 15:29
-# @Desc  :
+# @Desc  : 查询数据库中经过base64编码的html文本中的图片链接地址
 
 import pymysql
 import base64
