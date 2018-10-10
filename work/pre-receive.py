@@ -22,7 +22,9 @@ checkFailedMessage = '''########################################################
 
 
 #日志匹配正则
-commitMessagePattern = '^(feat|fix|hotfix|docs|style|refactor|perf|test|chore|revert)(\([^\s]*?\))?(\:\s|\：){1}[^\s]{10,}|^Merge\ branch(.*)'
+commitMessagePattern = '^(feat|fix|hotfix|docs|style|refactor|perf|test|chore|revert)(\([^\s]*?\))?(\:\s|\：){1}[^\s]{10,}
+			|^Merge\ branch(.*)
+			|^合并分支(.*)'
 
 #获取提交日志列表
 def getMsgs(old,new):
@@ -57,8 +59,8 @@ try:
 	     print(msg+" is meet the requirement")
 	  else:
 	     print(msg+" is not meet the requirement\n")
-	    print(checkFailedMessage)
-	    sys.exit(1)
+	     print(checkFailedMessage)
+	     sys.exit(1)
 except subprocess.CalledProcessError as err:
     print('======= %s %s ERROR ======='%(branch,err.output))
     sys.exit(1)
